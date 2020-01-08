@@ -3,14 +3,15 @@ FROM kadalu/kadalu-base
 RUN yum -y install python3-pyxattr glusterfs-server
 RUN rpm -qa | grep gluster | tee /gluster-rpm-versions.txt
 
-COPY lib/kadalulib.py        /kadalu/kadalulib.py
-COPY server/server.py        /kadalu/server.py
-COPY server/glusterfsd.py    /kadalu/glusterfsd.py
-COPY server/kadalu_quotad/quotad.py   /kadalu/quotad.py
-COPY server/shd.py           /kadalu/shd.py
-COPY server/mount-glustervol /usr/bin/mount-glustervol
-COPY lib/startup.sh          /kadalu/startup.sh
-COPY server/stop-server.sh   /kadalu/stop-server.sh
+COPY lib/kadalulib.py                 /kadalu/
+COPY server/server.py                 /kadalu/
+COPY server/glusterfsd.py             /kadalu/
+COPY server/kadalu_quotad/quotad.py   /kadalu/
+COPY server/shd.py                    /kadalu/
+COPY lib/startup.sh                   /kadalu/
+COPY server/stop-server.sh            /kadalu/
+
+COPY server/mount-glustervol          /usr/bin/
 
 RUN mkdir -p /kadalu/templates /kadalu/volfiles
 

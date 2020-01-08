@@ -9,6 +9,7 @@ import logging
 
 from jinja2 import Template
 import xattr
+from prometheus_client import Counter, Gauge
 
 from kadalulib import execute, CommandException, logf, send_analytics_tracker
 
@@ -161,6 +162,8 @@ def start():
     # The information from this analytics is available for
     # developers to understand and build project in a better way
     send_analytics_tracker("server", uid)
+
+    test_counter = Gauge("test", "Test Counter")
 
     os.execv(
         "/usr/sbin/glusterfsd",

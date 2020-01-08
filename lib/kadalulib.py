@@ -12,7 +12,7 @@ import xxhash
 
 PV_TYPE_VIRTBLOCK = "virtblock"
 PV_TYPE_SUBVOL = "subvol"
-
+KADALU_PROMETHEUS_PORT = 9876
 
 def makedirs(dirpath):
     """exist_ok=True parameter will raise exception even if directory

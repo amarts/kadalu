@@ -9,6 +9,8 @@ import grpc
 
 import csi_pb2
 import csi_pb2_grpc
+from prometheus_client import Counter, Gauge
+
 from volumeutils import mount_and_select_hosting_volume, \
     create_virtblock_volume, create_subdir_volume, delete_volume, \
     get_pv_hosting_volumes, PV_TYPE_SUBVOL, PV_TYPE_VIRTBLOCK, \
@@ -18,13 +20,18 @@ from kadalulib import logf, send_analytics_tracker
 
 VOLINFO_DIR = "/var/lib/gluster"
 
-
 class ControllerServer(csi_pb2_grpc.ControllerServicer):
     """
     ControllerServer object is responsible for handling host
     volume mount and PV creation.
     Ref:https://github.com/container-storage-interface/spec/blob/master/spec.md
     """
+    def __init__(self):
+        self.pv_create = Counter("pv_create", "Total PV creates")
+        self.pv_delete = Counter("pv_delete", "Total PV deletes")
+        self.pv_active = Gauge("pv_active", "Total PV Active")
+        return
+
     # noqa # pylint: disable=too-many-locals,too-many-statements
     def CreateVolume(self, request, context):
         start_time = time.time()
@@ -86,6 +93,8 @@ class ControllerServer(csi_pb2_grpc.ControllerServicer):
                     ))
 
                     send_analytics_tracker("pvc-external", uid)
+                    self.pv_create.inc(1)
+                    self.pv_active.inc(1)
                     return csi_pb2.CreateVolumeResponse(
                         volume={
                             "volume_id": request.name,
@@ -122,6 +131,8 @@ class ControllerServer(csi_pb2_grpc.ControllerServicer):
                     duration_seconds=time.time() - start_time
                 ))
 
+                self.pv_create.inc(1)
+                self.pv_active.inc(1)
                 send_analytics_tracker("pvc-external-kadalu", uid)
                 # Pass required argument to get mount working on
                 # nodeplugin through volume_context
@@ -187,6 +198,9 @@ class ControllerServer(csi_pb2_grpc.ControllerServicer):
 
         update_free_size(hostvol, -pvsize)
 
+        self.pv_create.inc(1)
+        self.pv_active.inc(1)
+
         send_analytics_tracker("pvc-%s" % filters['hostvol_type'], uid)
         return csi_pb2.CreateVolumeResponse(
             volume={
@@ -210,6 +224,8 @@ class ControllerServer(csi_pb2_grpc.ControllerServicer):
             name=request.volume_id,
             duration_seconds=time.time() - start_time
         ))
+        self.pv_delete.inc(1)
+        self.pv_active.dec(1)
         return csi_pb2.DeleteVolumeResponse()
 
     def ValidateVolumeCapabilities(self, request, context):
