@@ -1,9 +1,9 @@
 FROM kadalu/kadalu-base
 
-RUN yum install -y glusterfs-fuse
+RUN dnf install -y glusterfs-fuse
 
 # need these to get grpcio (on arm64/ppc64le/s390x)
-RUN yum -y install make automake gcc-g++ openssl-devel kernel-headers  python3-distutils-extra
+RUN dnf -y install make automake gcc-g++ openssl-devel kernel-headers  python3-distutils-extra
 
 RUN python3 -m pip install --upgrade pip setuptools
 

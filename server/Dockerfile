@@ -1,6 +1,6 @@
 FROM kadalu/kadalu-base
 
-RUN yum -y install python3-pyxattr glusterfs-server
+RUN dnf -y install python3-pyxattr glusterfs-server
 RUN rpm -qa | grep gluster | tee /gluster-rpm-versions.txt
 
 RUN python3 -m pip install glustercli || true && echo "External storage Quota feature may not work"
