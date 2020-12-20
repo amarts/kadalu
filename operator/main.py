@@ -32,7 +32,8 @@ VOLUME_TYPE_REPLICA_2 = "Replica2"
 VOLUME_TYPE_REPLICA_3 = "Replica3"
 VOLUME_TYPE_EXTERNAL = "External"
 
-CREATE_CMD = "apply"
+CREATE_CMD = "create"
+APPLY_CMD = "apply"
 DELETE_CMD = "delete"
 
 def template(filename, **kwargs):
@@ -312,7 +313,7 @@ def deploy_server_pods(obj):
 
         filename = os.path.join(MANIFESTS_DIR, "server.yaml")
         template(filename, **template_args)
-        lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+        lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
         logging.info(logf("Deployed Server pod",
                           volname=volname,
                           manifest=filename,
@@ -347,7 +348,7 @@ def handle_external_storage_addition(core_v1_client, obj):
 
     filename = os.path.join(MANIFESTS_DIR, "external-storageclass.yaml")
     template(filename, **data)
-    lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+    lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
     logging.info(logf("Deployed External StorageClass", volname=volname, manifest=filename))
 
 
@@ -404,7 +405,7 @@ def handle_added(core_v1_client, obj):
 
     filename = os.path.join(MANIFESTS_DIR, "services.yaml")
     template(filename, namespace=NAMESPACE, volname=volname)
-    lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+    lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
     logging.info(logf("Deployed Service", volname=volname, manifest=filename))
 
 
@@ -468,7 +469,7 @@ def handle_modified(core_v1_client, obj):
 
     filename = os.path.join(MANIFESTS_DIR, "services.yaml")
     template(filename, namespace=NAMESPACE, volname=volname)
-    lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+    lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
     logging.info(logf("Deployed Service", volname=volname, manifest=filename))
 
 
@@ -702,11 +703,11 @@ def deploy_csi_pods(core_v1_client):
        api_instance.minor >= "14":
         filename = os.path.join(MANIFESTS_DIR, "csi-driver-object.yaml")
         template(filename, namespace=NAMESPACE, kadalu_version=VERSION)
-        lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+        lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
     else:
         filename = os.path.join(MANIFESTS_DIR, "csi-driver-crd.yaml")
         template(filename, namespace=NAMESPACE, kadalu_version=VERSION)
-        lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+        lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
 
     filename = os.path.join(MANIFESTS_DIR, "csi.yaml")
     docker_user = os.environ.get("DOCKER_USER", "kadalu")
@@ -714,7 +715,7 @@ def deploy_csi_pods(core_v1_client):
              docker_user=docker_user, k8s_dist=K8S_DIST,
              kubelet_dir=KUBELET_DIR)
 
-    lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+    lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
     logging.info(logf("Deployed CSI Pods", manifest=filename))
 
 
@@ -772,7 +773,7 @@ def deploy_storage_class():
 
         # Deploy Storage Class
         template(filename, namespace=NAMESPACE, kadalu_version=VERSION)
-        lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
+        lib_execute(KUBECTL_CMD, APPLY_CMD, "-f", filename)
         logging.info(logf("Deployed StorageClass", manifest=filename))
 
 
