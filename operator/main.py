@@ -725,6 +725,7 @@ def deploy_config_map(core_v1_client):
     configmaps = core_v1_client.list_namespaced_config_map(
         NAMESPACE)
     uid = uuid.uuid4()
+    upgrade = False
     for item in configmaps.items:
         if item.metadata.name == KADALU_CONFIG_MAP:
             logging.info(logf(
@@ -737,6 +738,7 @@ def deploy_config_map(core_v1_client):
                 KADALU_CONFIG_MAP, NAMESPACE)
             if configmap_data.data.get("uid", None):
                 uid = configmap_data.data["uid"]
+                upgrade = True
             # Keep the config details required to be preserved.
 
     # Deploy Config map
@@ -748,7 +750,7 @@ def deploy_config_map(core_v1_client):
 
     lib_execute(KUBECTL_CMD, CREATE_CMD, "-f", filename)
     logging.info(logf("Deployed ConfigMap", manifest=filename))
-    return uid
+    return uid, upgrade
 
 
 def deploy_storage_class():
@@ -790,13 +792,17 @@ def main():
     k8s_client = client.ApiClient()
 
     # ConfigMap
-    uid = deploy_config_map(core_v1_client)
+    uid, upgrade = deploy_config_map(core_v1_client)
 
     # CSI Pods
     deploy_csi_pods(core_v1_client)
 
     # Storage Class
     deploy_storage_class()
+
+    if upgrade:
+        logging.info(logf("Upgrading to ", version=VERSION))
+        upgrade_storage_pods()
 
     # Send Analytics Tracker
     # The information from this analytics is available for
