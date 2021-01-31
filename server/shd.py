@@ -61,6 +61,7 @@ def start():
             "-l", "-",  # Log to stderr
             "--xlator-option",
             "*replicate*.node-uuid=%s" % os.environ["NODEID"],
+            "--fs-display-name", "kadalu:%s" % volname,
             "-f", volfile_path
         ]
     )
